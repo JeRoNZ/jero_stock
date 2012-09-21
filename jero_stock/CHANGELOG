@@ -1,0 +1,27 @@
+1.1.1	Added support for weight and weight units (kg, g, oz, lb)
+
+1.1	Added dashboard job allowing automated updates from
+	files/incoming/stock.csv. All fields found in the file
+	are processed.
+
+1.0.7	Minor cosmetic changes to work better with Concrete 5.5/eCommerce 2.5
+
+1.0.6	Pricing tiers now use a comma not a hyphen, since excel seems
+	to sometimes assume that these are dates.
+
+1.0.5	Reversed order of ID and Name columns, to stop Excel compaining
+	about "SYLK" file format invalid.
+
+1.0.4	use "eCommerce" as description
+
+1.0.3	Fixed broken HTML causing file dialog to open in WebKit browsers
+
+1.0.2	Removed job in favour of single page "jero-stock".
+
+1.0.1	Job name now matches class name
+ 	Fixed missing t() usages.
+	Removed Cache:flush() from controller
+	Use $this->url for job link
+
+1.0 Initial release
+
