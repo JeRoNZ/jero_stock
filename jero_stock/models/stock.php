@@ -143,6 +143,10 @@ HERE;
 	$data['prRequiresLoginToPurchase'] = $product->productRequiresLoginToPurchase();
 	$data['prUseTieredPricing'] = $product->productUsesTieredPricing();
 
+
+// Don't overwrite with the default value
+	$data['prQuantityAllowNegative'] = $product->prQuantityAllowNegative;
+
 	if ($data['prUseTieredPricing']) {
 	    Loader::model('product/tiered_price', 'core_commerce');
 	    $tiers = CoreCommerceProductTieredPrice::getTiers($product);

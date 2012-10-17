@@ -1,3 +1,5 @@
+1.1.2	Don't overwrite the allow negative stock value
+
 1.1.1	Added support for weight and weight units (kg, g, oz, lb)
 
 1.1	Added dashboard job allowing automated updates from
@@ -9,7 +11,7 @@
 1.0.6	Pricing tiers now use a comma not a hyphen, since excel seems
 	to sometimes assume that these are dates.
 
-1.0.5	Reversed order of ID and Name columns, to stop Excel compaining
+1.0.5	Reversed order of ID and Name columns, to stop Excel complaining
 	about "SYLK" file format invalid.
 
 1.0.4	use "eCommerce" as description
