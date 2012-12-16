@@ -30,34 +30,6 @@ class JeRoCoreCommerceStockCSV {
 	    'Units' => 'prWeightUnits');
     }
 
-    function squeal() {
-	if ($this->error->has()) {
-	    ?><div style="background:#EEE;padding: 10px 10px 10px 20px;border:1px solid #94a7c7;margin-bottom:10px;">
-		<?php 
-		$this->error->output();
-		?></div><?php 
-	}
-    }
-
-    function message($msg, $error=false) {
-	$template = <<<HERE
-<div id="ccm-dashboard-result-message" class="ccm-ui" style="display: block;">
-<div class="row">
-<div class="span16">
-<div class="ERR">
-MESS
-</div>
-</div>
-</div>
-</div>
-HERE;
-	$template = str_replace('MESS', $msg, $template);
-	if ($error)
-	    $template = str_replace('ERR', 'alert-message error', $template);
-	else
-	    $template = str_replace('ERR', 'message alert-message info success', $template);
-	echo $template;
-    }
 
     public function import() {
 	Loader::model('product/model', 'core_commerce');

@@ -1,3 +1,6 @@
+2.0	Reworked to fully support 5.6 dashboard theme.
+	Minimum supported C5 version now 5.6
+
 1.1.2	Don't overwrite the allow negative stock value
 
 1.1.1	Added support for weight and weight units (kg, g, oz, lb)
