@@ -16,7 +16,7 @@ echo Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Mass
     <p><?php echo t('The Upload form allows you to decide which fields you wish to update. You must choose at least one field. You must ensure that if you choose a field to update, that the corresponding field exists in your CSV file.') ?></p>
     <p><?php echo t('The data is validated, and any errors are reported if found. No updates are done if there are any errors.') ?></p>
     <p><?php echo t('The <em>Status,Tiered</em> and <em> Login</em> fields must contain either a <em>1</em> (enable) or <em>0</em> (disable). Any other value will cause an error to be generated.') ?></p>
-    <p><strong><?php echo t('As with all mass update programs, the possibility of disaster is every present, and therefore a ') ?><a href="<?php echo $this->url('/dashboard/system/backup') ?>"><?php echo t('judicious backup is advised.') ?></a></strong></p>
+    <p><strong><?php echo t('As with all mass update programs, the possibility of disaster is every present, and therefore a ') ?><a href="<?php echo $this->url('/dashboard/system/backup_restore/backup/') ?>"><?php echo t('judicious backup is advised.') ?></a></strong></p>
     <h3><span><?php echo t('Download Data') ?></span></h3>
     <div class="ccm-buttons">
 	<div style="float:left;margin-right:10px">

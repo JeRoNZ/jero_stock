@@ -1,3 +1,7 @@
+2.0.2	Set the dashboard icon
+
+2.0.1	Updated database backup link for 5.6
+
 2.0	Reworked to fully support 5.6 dashboard theme.
 	Minimum supported C5 version now 5.6
 

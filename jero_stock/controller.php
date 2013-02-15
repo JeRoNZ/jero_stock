@@ -6,7 +6,7 @@ class JeroStockPackage extends Package {
 
     protected $pkgHandle = 'jero_stock';
     protected $appVersionRequired = '5.6';
-    protected $pkgVersion = '2';
+    protected $pkgVersion = '2.0.2';
     private $jobName = 'jero_stock_csv_import';
 
     public function getPackageDescription() {
@@ -30,7 +30,8 @@ class JeroStockPackage extends Package {
 
         $pkg = parent::install();
         Loader::model('single_page');
-        SinglePage::add('dashboard/core_commerce/stock', $pkg);
+        $page = SinglePage::add('dashboard/core_commerce/stock', $pkg);
+	$page->setAttribute('icon_dashboard', 'icon-wrench');
 
         $chk = SinglePage::add('/jero-stock', $pkg);
         $chk->setAttribute('exclude_nav', 1);
@@ -47,6 +48,10 @@ class JeroStockPackage extends Package {
         Loader::model('job');
         if (! Job::getByHandle($this->jobName))
             Job::installByPackage($this->jobName, $pkg);
+
+	$page = SinglePage::getByPath('/dashboard/core_commerce/stock');
+	if (!$page->isError())
+	    $page->setAttribute('icon_dashboard', 'icon-wrench');
     }
 
     public function uninstall() {
