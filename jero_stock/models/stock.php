@@ -33,7 +33,7 @@ class JeRoCoreCommerceStockCSV {
 	    'Weight' => 'prWeight',
 	    'Units' => 'prWeightUnits');
 	$this->update = array();
-	$this->updateAttributes= array();
+	$this->updateAttributes = array();
     }
 
     public function import() {
@@ -94,8 +94,8 @@ class JeRoCoreCommerceStockCSV {
     }
 
     private function importAttributes($fields, $product) {
-	foreach ($this->headers as $v => $k) {
-	    if (substr($v, 0, 10) == 'Attribute_') {
+	foreach ($this->headers as $v => $k) :
+	    if (substr($v, 0, 10) == 'Attribute_') :
 		$ah = substr($v, 10);
 
 // Only update attributes requested by user
@@ -107,26 +107,49 @@ class JeRoCoreCommerceStockCSV {
 		if (!$ak)
 		    continue;
 
+// Ensure values are sensible
+		$av = $fields[$k];
 		switch ($ak->atHandle) :
 		    case "text":
+		    case "textarea":
+			break;
+		    case "date_time":
+			if ($av != '') { // This isn't perfect, and will allow invalid dates but does enforce a valid format
+			    $regex = '@^[0-9]{4}-[0-1][0-9]-[0-3][0-9]( [0-2][0-9](:[0-5][0-9]){2}){0,1}$@';
+			    if (!preg_match($regex, $av))
+				continue;
+			}
+			break;
+
+		    case "boolean":
+			switch ($av) {
+			    case "1":
+			    case "0":
+			    case "":
+				break;
+			    default:
+				continue;
+			}
+			break;
+
 		    case "number":
 		    case "rating":
-		    case "boolean":
-		    case "textarea":
-		    case "date_time":
-			$av = $fields[$k];
+			if ($av != '') {
+			    if (!ctype_digit($av))
+				continue;
+			}
 			break;
 
 		    case "select":
 // unmap | to newline for multiple select values
-			$av = explode("|", $fields[$k]); 
+			$av = explode("|", $fields[$k]);
 			if (count($av) == 1)
 			    $av = $av[0];
 			break;
 
 		    case "image_file":
-			if (ctype_digit($fields[$k])) {
-			    $av = File::getByID($fields[$k]);
+			if (ctype_digit($av)) {
+			    $av = File::getByID($av);
 			    if ($av->error)
 				continue;
 			} else {
@@ -140,8 +163,8 @@ class JeRoCoreCommerceStockCSV {
 		endswitch;
 
 		$product->setAttribute($ak, $av);
-	    }
-	}
+	    endif;
+	endforeach;
     }
 
     private function set($product) {
