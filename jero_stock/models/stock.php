@@ -1,5 +1,8 @@
-<?php 
+<?php
+
 defined('C5_EXECUTE') or die("Access Denied.");
+Loader::model('product/model', 'core_commerce');
+Loader::model('attribute/categories/core_commerce_product', 'core_commerce');
 
 class JeRoCoreCommerceStockCSV {
 
@@ -8,12 +11,13 @@ class JeRoCoreCommerceStockCSV {
     private $file = 'stockfile';
     private $headers;
     private $update;
+    private $updateAttributes;
     private $line;
     private $decode;
     private $runAsJob = false;
     const JOBFILE = 'files/incoming/stock.csv';
     // These are hard coded in ecommerce, so we do the same
-    private $unitsArray = array('g','kg','oz','lb');
+    private $unitsArray = array('g', 'kg', 'oz', 'lb');
 
     function __construct() {
 	$this->error = Loader::helper('validation/error');
@@ -28,11 +32,11 @@ class JeRoCoreCommerceStockCSV {
 	    'Min' => 'prMinimumPurchaseQuantity',
 	    'Weight' => 'prWeight',
 	    'Units' => 'prWeightUnits');
+	$this->update = array();
+	$this->updateAttributes= array();
     }
 
-
     public function import() {
-	Loader::model('product/model', 'core_commerce');
 	if ($this->runAsJob) {
 	    if (!$handle = fopen(JeRoCoreCommerceStockCSV::JOBFILE, 'r')) {
 		throw new exception(t("Error opening ") . JeRoCoreCommerceStockCSV::JOBFILE);
@@ -42,7 +46,6 @@ class JeRoCoreCommerceStockCSV {
 
 	fgetcsv($handle);  // Skip the header row
 	while ($fields = fgetcsv($handle)) {
-	    file_put_contents('/tmp/crap',$fields[0],FILE_APPEND);
 	    $product = new CoreCommerceProduct();
 	    $product->load($fields[$this->headers['ID']]);
 // skip invalid products
@@ -52,16 +55,22 @@ class JeRoCoreCommerceStockCSV {
 	    $data = $this->set($product);
 
 // Override with imported ones
-	    foreach ($this->update as $value) {
-		switch ($value) {
-		    case 'TP':
-			$data['prTieredPricing'] = $this->import_tiers($fields);
-			break;
-		    default:
-			$data[$value] = $fields[$this->headers[$value]];
-			break;
+	    if (is_array($this->update)) {
+		foreach ($this->update as $value) {
+		    switch ($value) {
+			case 'TP':
+			    $data['prTieredPricing'] = $this->import_tiers($fields);
+			    break;
+			default:
+			    $data[$value] = $fields[$this->headers[$value]];
+			    break;
+		    }
 		}
 	    }
+
+// Update attributes TODO make this luser definable
+	    $this->importAttributes($fields, $product);
+
 // Update the product
 	    $product->update($data);
 	}
@@ -82,6 +91,57 @@ class JeRoCoreCommerceStockCSV {
 	    }
 	}
 	return $data;
+    }
+
+    private function importAttributes($fields, $product) {
+	foreach ($this->headers as $v => $k) {
+	    if (substr($v, 0, 10) == 'Attribute_') {
+		$ah = substr($v, 10);
+
+// Only update attributes requested by user
+		if (!in_array($ah, $this->updateAttributes))
+		    continue;
+
+// Does the attribute handle actually exist?
+		$ak = CoreCommerceProductAttributeKey::getByHandle($ah);
+		if (!$ak)
+		    continue;
+
+		switch ($ak->atHandle) :
+		    case "text":
+		    case "number":
+		    case "rating":
+		    case "boolean":
+		    case "textarea":
+		    case "date_time":
+			$av = $fields[$k];
+			break;
+
+		    case "select":
+// unmap | to newline for multiple select values
+			$av = explode("|", $fields[$k]); 
+			if (count($av) == 1)
+			    $av = $av[0];
+			break;
+
+		    case "image_file":
+			if (ctype_digit($fields[$k])) {
+			    $av = File::getByID($fields[$k]);
+			    if ($av->error)
+				continue;
+			} else {
+			    continue;
+			}
+			break;
+
+		    default:
+			continue;
+			break;
+		endswitch;
+
+		$product->setAttribute($ak, $av);
+	    }
+	}
     }
 
     private function set($product) {
@@ -136,7 +196,7 @@ class JeRoCoreCommerceStockCSV {
 
     public function uploadJob() {
 // Perform the upload
-	$this->runAsJob=true;
+	$this->runAsJob = true;
 	$suffix = t(' column not found in source file');
 	$done = false;
 	$handle = fopen(JeRoCoreCommerceStockCSV::JOBFILE, 'r');
@@ -165,7 +225,7 @@ class JeRoCoreCommerceStockCSV {
 		    }
 		    $this->update[] = 'TP';
 		}
-		if (count($this->update)==0){
+		if (count($this->update) == 0) {
 		    throw new Exception(t('No columns to update'));
 		}
 		continue;
@@ -177,7 +237,7 @@ class JeRoCoreCommerceStockCSV {
 	    }
 	}
 	fclose($handle);
-	if (!$done){
+	if (!$done) {
 	    throw new Exception('File is empty');
 	}
 	// Rename the header keys to match DB fields, not the user friendly ones
@@ -228,6 +288,12 @@ class JeRoCoreCommerceStockCSV {
 			}
 			$this->update[] = 'TP';
 		    }
+
+		    foreach ($_POST as $k => $v) {
+			if (substr($k, 0, 10) == 'Attribute_')
+			    $this->updateAttributes[] = substr($k, 10);
+		    }
+
 		    continue;
 		}
 		foreach ($this->headers as $key => $value) {
@@ -320,10 +386,20 @@ class JeRoCoreCommerceStockCSV {
     public function download() {
 	header("Content-type: application/force-download");
 	header('Content-disposition: attachment; filename="stock.csv"');
-	echo 'Name,ID,Qty,Status,Price,Special,Tiered,Login,Min,Weight,Units,Tier1,Price1,Tier2,Price2,Tier3,Price3,Tier4,Price4,Tier5,Price5,Tier6,Price6,Tier7,Price7,Tier8,Price8,Tier9,Price9,Tier10,Price10' . PHP_EOL;
+	$header = 'Name,ID,Qty,Status,Price,Special,Tiered,Login,Min,Weight,Units,Tier1,Price1,Tier2,Price2,Tier3,Price3,Tier4,Price4,Tier5,Price5,Tier6,Price6,Tier7,Price7,Tier8,Price8,Tier9,Price9,Tier10,Price10';
 	$db = Loader::db();
 	$sql = 'select productID,prName,prQuantity,prStatus,prPrice,prSpecialPrice,prUseTieredPricing,prRequiresLoginToPurchase,prMinimumPurchaseQuantity,prWeight,prWeightUnits from CoreCommerceProducts';
 	$tql = 'select * from CoreCommerceProductTieredPricing where productID=? order by productTieredPricingID';
+
+	$aql = "select akID,akHandle from AttributeKeys inner join AttributeKeyCategories on AttributeKeys.akCategoryID = AttributeKeyCategories.akCategoryID where  akCategoryHandle = 'core_commerce_product'";
+	$a = $db->getAll($aql);
+	foreach ($a as $v) {
+	    $attributeHandles[$v['akID']] = $v['akHandle'];
+	    $header.=',Attribute_' . $v['akHandle'];
+	}
+
+	echo $header . PHP_EOL;
+
 	$data = $db->getAll($sql);
 	foreach ($data as $row) {
 	    if ($row['prUseTieredPricing'] == 1) {
@@ -349,9 +425,31 @@ class JeRoCoreCommerceStockCSV {
 	    }
 	    else
 		echo ",,,,,,,,,,,,,,,,,,,,";
+	    /*
+	      Loader::model('attribute/categories/core_commerce_product','core_commerce');
+	      return CoreCommerceProductAttributeKey::getAttributes($productID);
+	      Above won't return a value if a new attribute has been added and not set for the product.
+	      Thus picking out a list of defined attributes and then getting values for each one is the only way to proceed
+	     */
+	    $prObject = new CoreCommerceProduct();
+	    $prObject->load($row['productID']);
+	    echo ',';
+	    foreach ($attributeHandles as $v) {
+		$at = $prObject->getAttribute($v);
+
+// may be a file attribute, so will be return an object. Output the file ID.
+		if (is_object($at)) {
+		    if (get_class($at) == 'File')
+			$at = $at->fID;
+		}
+// multiple values are new line delimited, map this to |
+
+		echo $this->quote(str_replace("\n", '|', $at)) . ',';
+	    }
 	    echo PHP_EOL;
 	}
     }
 
 }
-    ?>
+
+?>

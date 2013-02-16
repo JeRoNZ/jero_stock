@@ -20,7 +20,6 @@ echo Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Mass
     <h3><span><?php echo t('Download Data') ?></span></h3>
     <div class="ccm-buttons">
 	<div style="float:left;margin-right:10px">
-	    <?php // TODO fix this ARSE ?>
 	    <form method="post" enctype="multipart/form-data" action="<?php echo $this->action('download') ?>">
 		<?php echo $ih->submit(t('Download'), 'function', 'left', 'primary', array('style' => 'outline:none')) ?>
 	    </form>
@@ -35,23 +34,36 @@ echo Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Mass
     <form id="UploadForm" method="post" enctype="multipart/form-data" action="<?php echo $this->action('upload') ?>">
 	<label for="stockfile"><?php echo t('File name') ?> </label><?php echo $form->file('stockfile') ?>
 
-	<h4><?php echo t('Fields to update') ?></h4>
 	<div class="clearfix">
-	    <ul class="inputs-list">
-		<li><label><?php echo $form->checkbox('prQuantity', 1) ?> <span><?php echo t('Quantity') ?></span></label></li>
-		<li><label><?php echo $form->checkbox('prStatus', 1) ?> <span><?php echo t('Status') ?></span></label></li>
-		<li><label><?php echo $form->checkbox('prPrice', 1) ?> <span><?php echo t('Price') ?></span></label></li>
-		<li><label><?php echo $form->checkbox('prSpecialPrice', 1) ?> <span><?php echo t('Special') ?></span></label></li>
-		<li><label><?php echo $form->checkbox('prUseTieredPricing', 1) ?> <span><?php echo t('Use tiered pricing') ?></span></label></li>
-		<li><label><?php echo $form->checkbox('prRequiresLoginToPurchase', 1) ?> <span><?php echo t('Login to purchase') ?></span></label></li>
-		<li><label><?php echo $form->checkbox('prMinimumPurchaseQuantity', 1) ?> <span><?php echo t('Minimum order quantity') ?></span></label></li>
-		<li><label><?php echo $form->checkbox('prWeight', 1) ?> <span><?php echo t('Weight') ?></span></label></li>
-		<li><label><?php echo $form->checkbox('prWeightUnits', 1) ?> <span><?php echo t('Weight units') ?></span></label></li>
-		<li><label><?php echo $form->checkbox('TP', 1) ?> <span><?php echo t('Tiered prices') ?></span></label></li>
-	    </ul>
+	    <div style="float:left;width:50%">
+		<h4><?php echo t('Fields to update') ?></h4>
+		 <ul class="inputs-list inputs-list-options">
+		    <li><label><?php echo $form->checkbox('prQuantity', 1) ?> <span><?php echo t('Quantity') ?></span></label></li>
+		    <li><label><?php echo $form->checkbox('prStatus', 1) ?> <span><?php echo t('Status') ?></span></label></li>
+		    <li><label><?php echo $form->checkbox('prPrice', 1) ?> <span><?php echo t('Price') ?></span></label></li>
+		    <li><label><?php echo $form->checkbox('prSpecialPrice', 1) ?> <span><?php echo t('Special') ?></span></label></li>
+		    <li><label><?php echo $form->checkbox('prUseTieredPricing', 1) ?> <span><?php echo t('Use tiered pricing') ?></span></label></li>
+		    <li><label><?php echo $form->checkbox('prRequiresLoginToPurchase', 1) ?> <span><?php echo t('Login to purchase') ?></span></label></li>
+		    <li><label><?php echo $form->checkbox('prMinimumPurchaseQuantity', 1) ?> <span><?php echo t('Minimum order quantity') ?></span></label></li>
+		    <li><label><?php echo $form->checkbox('prWeight', 1) ?> <span><?php echo t('Weight') ?></span></label></li>
+		    <li><label><?php echo $form->checkbox('prWeightUnits', 1) ?> <span><?php echo t('Weight units') ?></span></label></li>
+		    <li><label><?php echo $form->checkbox('TP', 1) ?> <span><?php echo t('Tiered prices') ?></span></label></li>
+		</ul>
+	    </div>
+
+
+	    <div style="float:left">
+		<h4><?php echo t('Attributes to update') ?></h4>
+		 <ul class="inputs-list inputs-list-attributes">
+			 <?php $this->controller->getAttributes(); ?>
+		</ul>
+	    </div>
 	</div>
+
+
 	<?php echo $ih->submit(t('Upload'), 'function', 'left', 'primary', array('style' => 'outline:none')) ?>
 	<?php echo $ih->submit(t('All'), 'All', 'left', NULL, array('style' => 'outline:none')) ?>
+	<?php echo $ih->submit(t('Attributes'), 'Attributes', 'left', NULL, array('style' => 'outline:none')) ?>
 	<?php echo $ih->submit(t('None'), 'None', 'left', NULL, array('style' => 'outline:none')) ?>
     </form>
 </div>
@@ -62,7 +74,11 @@ echo Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Mass
     $(document).ready(function(){
 	$('#ccm-submit-All').click(function(e){
 	    e.preventDefault();
-	    $('#UploadForm input[type=checkbox]').attr('checked',true);
+	    $('#UploadForm ul.inputs-list-options input[type=checkbox]').attr('checked',true);
+	});
+	$('#ccm-submit-Attributes').click(function(e){
+	    e.preventDefault();
+	    $('#UploadForm ul.inputs-list-attributes input[type=checkbox]').attr('checked',true);
 	});
 	$('#ccm-submit-None').click(function(e){
 	    e.preventDefault();
