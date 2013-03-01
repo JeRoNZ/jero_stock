@@ -1,3 +1,5 @@
+2.1.1	Suppress PHP warnings if no attributes are defined
+
 2.1	Support for product attributes
 
 2.0.2	Set the dashboard icon

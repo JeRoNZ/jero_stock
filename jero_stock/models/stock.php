@@ -416,6 +416,7 @@ class JeRoCoreCommerceStockCSV {
 
 	$aql = "select akID,akHandle from AttributeKeys inner join AttributeKeyCategories on AttributeKeys.akCategoryID = AttributeKeyCategories.akCategoryID where  akCategoryHandle = 'core_commerce_product'";
 	$a = $db->getAll($aql);
+	$attributeHandles = array();
 	foreach ($a as $v) {
 	    $attributeHandles[$v['akID']] = $v['akHandle'];
 	    $header.=',Attribute_' . $v['akHandle'];
