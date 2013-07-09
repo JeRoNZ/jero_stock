@@ -31,7 +31,8 @@ class JeRoCoreCommerceStockCSV {
 	    'Login' => 'prRequiresLoginToPurchase',
 	    'Min' => 'prMinimumPurchaseQuantity',
 	    'Weight' => 'prWeight',
-	    'Units' => 'prWeightUnits');
+	    'Units' => 'prWeightUnits',
+	    'RequiresTax' => 'prRequiresTax');
 	$this->update = array();
 	$this->updateAttributes = array();
     }
@@ -351,6 +352,7 @@ class JeRoCoreCommerceStockCSV {
 	    case 'Status':
 	    case 'Tiered':
 	    case 'Login':
+	    case 'RequiresTax':
 		if ($value == '1' or $value == '0')
 		    return true;
 		break;
@@ -409,9 +411,9 @@ class JeRoCoreCommerceStockCSV {
     public function download() {
 	header("Content-type: application/force-download");
 	header('Content-disposition: attachment; filename="stock.csv"');
-	$header = 'Name,ID,Qty,Status,Price,Special,Tiered,Login,Min,Weight,Units,Tier1,Price1,Tier2,Price2,Tier3,Price3,Tier4,Price4,Tier5,Price5,Tier6,Price6,Tier7,Price7,Tier8,Price8,Tier9,Price9,Tier10,Price10';
+	$header = 'Name,ID,Qty,Status,Price,Special,Tiered,Login,Min,Weight,Units,RequiresTax,Tier1,Price1,Tier2,Price2,Tier3,Price3,Tier4,Price4,Tier5,Price5,Tier6,Price6,Tier7,Price7,Tier8,Price8,Tier9,Price9,Tier10,Price10,';
 	$db = Loader::db();
-	$sql = 'select productID,prName,prQuantity,prStatus,prPrice,prSpecialPrice,prUseTieredPricing,prRequiresLoginToPurchase,prMinimumPurchaseQuantity,prWeight,prWeightUnits from CoreCommerceProducts';
+	$sql = 'select productID,prName,prQuantity,prStatus,prPrice,prSpecialPrice,prUseTieredPricing,prRequiresLoginToPurchase,prMinimumPurchaseQuantity,prWeight,prWeightUnits,prRequiresTax from CoreCommerceProducts';
 	$tql = 'select * from CoreCommerceProductTieredPricing where productID=? order by productTieredPricingID';
 
 	$aql = "select akID,akHandle from AttributeKeys inner join AttributeKeyCategories on AttributeKeys.akCategoryID = AttributeKeyCategories.akCategoryID where  akCategoryHandle = 'core_commerce_product'";
@@ -439,7 +441,8 @@ class JeRoCoreCommerceStockCSV {
 	    $row['prRequiresLoginToPurchase'] . ',' .
 	    $row['prMinimumPurchaseQuantity'] . ',' .
 	    $row['prWeight'] . ',' .
-	    $row['prWeightUnits'];
+	    $row['prWeightUnits']. ',' .
+	    $row['prRequiresTax'];
 
 	    if ($row['prUseTieredPricing'] == 1) {
 		$tiers = $db->getAll($tql, array($row['productID']));

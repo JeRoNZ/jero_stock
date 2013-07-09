@@ -6,7 +6,7 @@ class JeroStockPackage extends Package {
 
     protected $pkgHandle = 'jero_stock';
     protected $appVersionRequired = '5.6';
-    protected $pkgVersion = '2.1.1';
+    protected $pkgVersion = '2.1.2';
     private $jobName = 'jero_stock_csv_import';
 
     public function getPackageDescription() {

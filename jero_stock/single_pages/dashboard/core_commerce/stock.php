@@ -47,6 +47,7 @@ echo Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Mass
 		    <li><label><?php echo $form->checkbox('prMinimumPurchaseQuantity', 1) ?> <span><?php echo t('Minimum order quantity') ?></span></label></li>
 		    <li><label><?php echo $form->checkbox('prWeight', 1) ?> <span><?php echo t('Weight') ?></span></label></li>
 		    <li><label><?php echo $form->checkbox('prWeightUnits', 1) ?> <span><?php echo t('Weight units') ?></span></label></li>
+		    <li><label><?php echo $form->checkbox('prRequiresTax', 1) ?> <span><?php echo t('Requires Tax') ?></span></label></li>
 		    <li><label><?php echo $form->checkbox('TP', 1) ?> <span><?php echo t('Tiered prices') ?></span></label></li>
 		</ul>
 	    </div>
