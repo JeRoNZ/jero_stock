@@ -37,4 +37,15 @@ class DashboardCoreCommerceStockController extends Controller {
 	    ' <span>' . htmlspecialchars($v['akName']) . '</span></label></li>';
 	}
     }
+
+    function getProductSets() {
+	$form = Loader::helper('form');
+	Loader::model('product/set', 'core_commerce');
+	$list = CoreCommerceProductSet::getList();
+	foreach($list as $set){
+	    echo '<li><label>' .
+	    $form->checkbox('Set_' . $set->prsID, 1) .
+	    ' <span>' . htmlspecialchars($set->prsName) . '</span></label></li>';
+	}
+    }
 }

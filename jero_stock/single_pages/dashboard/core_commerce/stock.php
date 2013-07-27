@@ -35,7 +35,7 @@ echo Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Mass
 	<label for="stockfile"><?php echo t('File name') ?> </label><?php echo $form->file('stockfile') ?>
 
 	<div class="clearfix">
-	    <div style="float:left;width:50%">
+	    <div style="float:left;width:33%">
 		<h4><?php echo t('Fields to update') ?></h4>
 		 <ul class="inputs-list inputs-list-options">
 		    <li><label><?php echo $form->checkbox('prQuantity', 1) ?> <span><?php echo t('Quantity') ?></span></label></li>
@@ -53,10 +53,16 @@ echo Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Mass
 	    </div>
 
 
-	    <div style="float:left">
+	    <div style="float:left;width:33%">
 		<h4><?php echo t('Attributes to update') ?></h4>
 		 <ul class="inputs-list inputs-list-attributes">
 			 <?php $this->controller->getAttributes(); ?>
+		</ul>
+	    </div>
+	     <div style="float:left">
+		<h4><?php echo t('Sets to update') ?></h4>
+		 <ul class="inputs-list inputs-list-sets">
+			 <?php $this->controller->getProductSets(); ?>
 		</ul>
 	    </div>
 	</div>
@@ -65,6 +71,7 @@ echo Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Mass
 	<?php echo $ih->submit(t('Upload'), 'function', 'left', 'primary', array('style' => 'outline:none')) ?>
 	<?php echo $ih->submit(t('All'), 'All', 'left', NULL, array('style' => 'outline:none')) ?>
 	<?php echo $ih->submit(t('Attributes'), 'Attributes', 'left', NULL, array('style' => 'outline:none')) ?>
+	<?php echo $ih->submit(t('Sets'), 'Sets', 'left', NULL, array('style' => 'outline:none')) ?>
 	<?php echo $ih->submit(t('None'), 'None', 'left', NULL, array('style' => 'outline:none')) ?>
     </form>
 </div>
@@ -81,6 +88,10 @@ echo Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Mass
 	    e.preventDefault();
 	    $('#UploadForm ul.inputs-list-attributes input[type=checkbox]').attr('checked',true);
 	});
+	$('#ccm-submit-Sets').click(function(e){
+	    e.preventDefault();
+	    $('#UploadForm ul.inputs-list-sets input[type=checkbox]').attr('checked',true);
+	});
 	$('#ccm-submit-None').click(function(e){
 	    e.preventDefault();
 	    $('#UploadForm input[type=checkbox]').attr('checked',false);
@@ -92,5 +103,5 @@ echo Loader::helper('concrete/dashboard')->getDashboardPaneHeaderWrapper(t('Mass
 		return false;
 	    }
 	});
-    })
+    });
 </script>

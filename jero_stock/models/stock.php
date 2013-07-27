@@ -2,6 +2,7 @@
 
 defined('C5_EXECUTE') or die("Access Denied.");
 Loader::model('product/model', 'core_commerce');
+Loader::model('product/set', 'core_commerce');
 Loader::model('attribute/categories/core_commerce_product', 'core_commerce');
 
 class JeRoCoreCommerceStockCSV {
@@ -12,6 +13,8 @@ class JeRoCoreCommerceStockCSV {
     private $headers;
     private $update;
     private $updateAttributes;
+    private $updateSets;
+    private $setList;
     private $line;
     private $decode;
     private $runAsJob = false;
@@ -35,6 +38,13 @@ class JeRoCoreCommerceStockCSV {
 	    'RequiresTax' => 'prRequiresTax');
 	$this->update = array();
 	$this->updateAttributes = array();
+	$this->updateSets = array();
+	$setList = CoreCommerceProductSet::getList();
+	$this->setList = array();
+	// use the prsID as the index, to make it easier to lookup the name
+	foreach($setList as $set){
+	    $this->setList[$set->prsID] = $set;
+	}
     }
 
     public function import() {
@@ -71,6 +81,8 @@ class JeRoCoreCommerceStockCSV {
 
 // Update attributes TODO make this luser definable
 	    $this->importAttributes($fields, $product);
+	    
+	    $this->importSets($fields, $product);
 
 // Update the product
 	    $product->update($data);
@@ -92,6 +104,53 @@ class JeRoCoreCommerceStockCSV {
 	    }
 	}
 	return $data;
+    }
+    
+    private function importSets($fields, $product) {
+	$db = Loader::db();
+	// No method for doing this, do it by hand :(
+	$chkSets = $db->getAll('SELECT prsID from CoreCommerceProductSetProducts WHERE productID=?',array($product->getProductID()));
+	$currentSets = array();
+	if (count($chkSets)){
+	    foreach ($chkSets as $set)
+		$currentSets[$set['prsID']] = $set['prsID'];
+	}
+
+	$update = false;
+	foreach ($this->headers as $v => $k) :
+	    if (substr($v, 0, 4) == 'Set_') :
+		$setName = substr($v, 4);
+	    
+		if (! array_key_exists($setName,$this->updateSets))
+		    continue;
+		$prSet = $this->setList[$this->updateSets[$setName]];
+		$prsID = $prSet->prsID;
+		switch($fields[$k]) {
+		    case 'Y':
+		    case '1':
+			if (! array_key_exists($prsID,$currentSets)){
+			    $currentSets[$prsID] = $prsID;
+			    $update = true;
+			}
+			break;
+		    case 'N':
+		    case '0':
+			if (array_key_exists($prsID,$currentSets)){
+			    unset ($currentSets[$prsID]);
+			    $update = true;
+			}
+			break;
+		    default:
+			continue;
+		}
+	    endif;
+	endforeach;
+
+	if (! $update)
+	    return;
+
+	$newsets = array_keys($currentSets);
+	$product->setProductSets($newsets);
     }
 
     private function importAttributes($fields, $product) {
@@ -318,6 +377,16 @@ class JeRoCoreCommerceStockCSV {
 			    $this->updateAttributes[] = substr($k, 10);
 		    }
 
+		    foreach ($_POST as $k => $v) {
+			if (substr($k, 0, 4) == 'Set_'){
+			    $setID=substr($k, 4);
+			    $prSet = $this->setList[$setID];
+			    if ($prSet){
+				$this->updateSets[$prSet->prsName] = $setID;
+			    }
+			}
+		    }
+		    
 		    continue;
 		}
 		foreach ($this->headers as $key => $value) {
@@ -424,6 +493,14 @@ class JeRoCoreCommerceStockCSV {
 	    $header.=',Attribute_' . $v['akHandle'];
 	}
 
+	$doSets=false;
+	if (count($this->setList)>0){
+	    $doSets=true;
+	    foreach ($this->setList as $set){
+		$header.=',Set_' . $set->prsName;
+	    }
+	}
+
 	echo $header . PHP_EOL;
 
 	$data = $db->getAll($sql);
@@ -473,6 +550,16 @@ class JeRoCoreCommerceStockCSV {
 
 		echo $this->quote(str_replace("\n", '|', $at)) . ',';
 	    }
+	    if ($doSets){
+		echo ',';
+		foreach ($this->setList as $set){
+		    if ($set->contains($prObject))
+			echo '"Y",';
+		    else
+			echo '"N",';
+		}
+	    }
+
 	    echo PHP_EOL;
 	}
     }
