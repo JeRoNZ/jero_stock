@@ -480,7 +480,7 @@ class JeRoCoreCommerceStockCSV {
     public function download() {
 	header("Content-type: application/force-download");
 	header('Content-disposition: attachment; filename="stock.csv"');
-	$header = 'Name,ID,Qty,Status,Price,Special,Tiered,Login,Min,Weight,Units,RequiresTax,Tier1,Price1,Tier2,Price2,Tier3,Price3,Tier4,Price4,Tier5,Price5,Tier6,Price6,Tier7,Price7,Tier8,Price8,Tier9,Price9,Tier10,Price10,';
+	$header = 'Name,ID,Qty,Status,Price,Special,Tiered,Login,Min,Weight,Units,RequiresTax,Tier1,Price1,Tier2,Price2,Tier3,Price3,Tier4,Price4,Tier5,Price5,Tier6,Price6,Tier7,Price7,Tier8,Price8,Tier9,Price9,Tier10,Price10';
 	$db = Loader::db();
 	$sql = 'select productID,prName,prQuantity,prStatus,prPrice,prSpecialPrice,prUseTieredPricing,prRequiresLoginToPurchase,prMinimumPurchaseQuantity,prWeight,prWeightUnits,prRequiresTax from CoreCommerceProducts';
 	$tql = 'select * from CoreCommerceProductTieredPricing where productID=? order by productTieredPricingID';
@@ -526,9 +526,12 @@ class JeRoCoreCommerceStockCSV {
 		foreach ($tiers as $v) {
 		    echo ',' . $this->quote($v['tierStart'] . ',' . $v['tierEnd']) . ',' . $v['tierPrice'];
 		}
+		if (count($tiers) < 10) {
+		    echo str_repeat(",",(10-count($tiers))*2);
+		}
 	    }
 	    else
-		echo ",,,,,,,,,,,,,,,,,,,,";
+		echo str_repeat(",",20);
 	    /*
 	      Loader::model('attribute/categories/core_commerce_product','core_commerce');
 	      return CoreCommerceProductAttributeKey::getAttributes($productID);
@@ -551,7 +554,6 @@ class JeRoCoreCommerceStockCSV {
 		echo $this->quote(str_replace("\n", '|', $at)) . ',';
 	    }
 	    if ($doSets){
-		echo ',';
 		foreach ($this->setList as $set){
 		    if ($set->contains($prObject))
 			echo '"Y",';
