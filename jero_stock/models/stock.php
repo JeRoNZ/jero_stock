@@ -460,6 +460,11 @@ class JeRoCoreCommerceStockCSV {
 	    case 'Tier10':
 		if (preg_match('/^[0-9]+\,[0-9]+$/', $value) === 1)
 		    return true;
+		// these two allow the "qty+" values
+		if (preg_match('/^[0-9]+\,$/', $value) === 1)
+			return true;
+		if (preg_match('/^[0-9]+$/', $value) === 1)
+			return true;
 		if ($value == '')
 		    return true;
 		break;
@@ -545,10 +550,12 @@ class JeRoCoreCommerceStockCSV {
 		$at = $prObject->getAttribute($v);
 
 // may be a file attribute, so will be return an object. Output the file ID.
-		if (is_object($at)) {
-		    if (get_class($at) == 'File')
-			$at = $at->fID;
-		}
+			if (is_object($at)) {
+				if (get_class($at) == 'File')
+					$at = $at->fID;
+				else // Support requests indicate we're getting an object of some sort here...
+					$at = 'Object: ' . get_class($at);
+			}
 // multiple values are new line delimited, map this to |
 
 		echo $this->quote(str_replace("\n", '|', $at)) . ',';
