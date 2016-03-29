@@ -1,3 +1,6 @@
+2.2.3  Replaced deprecated split function with explode.
+       Fix import of tiers when specified as "500+"
+
 2.2.2   Allow 1=+ in the pricing tiers.
 	If an attribute is an object, output the class name
 	to supress PHP warnings

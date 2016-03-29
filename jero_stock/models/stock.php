@@ -94,14 +94,16 @@ class JeRoCoreCommerceStockCSV {
 	for ($i = 1; $i <= 10; $i++) {
 	    $t = 'Tier' . $i;
 	    $p = 'Price' . $i;
-	    if (array_key_exists($t, $this->headers)) {
-		$bits = split(',', $fields[$this->headers[$t]]);
-		if (count($bits) == 2) {
-		    $data["tierStart"][] = $bits[0];
-		    $data["tierEnd"][] = $bits[1];
-		    $data["tierPrice"][] = $fields[$this->headers[$p]];
+		if (array_key_exists($t, $this->headers)) {
+			$bits = explode(',', $fields[$this->headers[$t]]);
+			$data["tierStart"][] = $bits[0];
+			if (count($bits) == 2) {
+				$data["tierEnd"][] = $bits[1];
+			} else {
+				$data["tierEnd"][] = null;
+			}
+			$data["tierPrice"][] = $fields[$this->headers[$p]];
 		}
-	    }
 	}
 	return $data;
     }
@@ -461,7 +463,7 @@ class JeRoCoreCommerceStockCSV {
 		if (preg_match('/^[0-9]+\,[0-9]+$/', $value) === 1)
 		    return true;
 		// these two allow the "qty+" values
-		if (preg_match('/^[0-9]+\,$/', $value) === 1)
+		if (preg_match('/^[0-9]+\+$/', $value) === 1)
 			return true;
 		if (preg_match('/^[0-9]+$/', $value) === 1)
 			return true;
